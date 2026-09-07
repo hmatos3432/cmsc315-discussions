@@ -17,14 +17,16 @@ class Node:
         # TODO (Student):
         # Store the node's value and initialize references
         # to the left and right child nodes.
-        pass
+        self.value = value
+        self.left = None
+        self.right = None
 
 
 class BST:
     def __init__(self):
         # TODO (Student):
         # Initialize an empty Binary Search Tree.
-        pass
+        self.root = None
 
     def insert(self, value):
         """
@@ -37,7 +39,10 @@ class BST:
           whether a value is smaller or larger than the
           current node.
         """
-        pass
+        # A BST keeps smaller values on the left and larger values on
+        # the right, so each comparison tells the recursion which half
+        # of the remaining tree could contain the correct insert point.
+        self.root = self._insert_recursive(self.root, value)
 
     def _insert_recursive(self, node, value):
         """
@@ -50,7 +55,20 @@ class BST:
         - Insert larger values into the right subtree.
         - Return the updated node reference.
         """
-        pass
+        # When an empty position is reached, the new value belongs there.
+        if node is None:
+            return Node(value)
+
+        if value < node.value:
+            node.left = self._insert_recursive(node.left, value)
+        elif value > node.value:
+            node.right = self._insert_recursive(node.right, value)
+        else:
+            # Duplicate values are not inserted so the tree stores one
+            # copy of each value and search results stay unambiguous.
+            return node
+
+        return node
 
     def search(self, value):
         """
@@ -63,14 +81,26 @@ class BST:
         - Add comments explaining why BST search is often
           more efficient than linear search.
         """
-        pass
+        # Unlike linear search, a BST search does not need to check every
+        # value when the tree is balanced. Each comparison can discard the
+        # entire left or right subtree from consideration.
+        return self._search_recursive(self.root, value)
 
     def _search_recursive(self, node, value):
         """
         TODO (Student):
         Implement recursive BST search.
         """
-        pass
+        if node is None:
+            return False
+
+        if value == node.value:
+            return True
+
+        if value < node.value:
+            return self._search_recursive(node.left, value)
+
+        return self._search_recursive(node.right, value)
 
     def inorder(self):
         """
@@ -78,7 +108,9 @@ class BST:
         Return a list containing the values from an
         in-order traversal.
         """
-        pass
+        values = []
+        self._inorder_recursive(self.root, values)
+        return values
 
     def _inorder_recursive(self, node, values):
         """
@@ -92,7 +124,15 @@ class BST:
         - Add comments explaining why this traversal
           produces sorted output in a BST.
         """
-        pass
+        if node is None:
+            return
+
+        # In a BST, every value in the left subtree is smaller than the
+        # current node and every value in the right subtree is larger.
+        # Visiting left, node, then right therefore produces sorted output.
+        self._inorder_recursive(node.left, values)
+        values.append(node.value)
+        self._inorder_recursive(node.right, values)
 
 
 def main():
@@ -111,7 +151,17 @@ def main():
     # 5. Use comments to explain why a BST is efficient at reducing search space for each step.
 
     print("\n=== TREE CONSTRUCTION ===")
-    print("TODO: Create a BST and insert multiple values.")
+    tree = BST()
+    tree_values = [50, 30, 70, 20, 40, 60, 80, 65]
+
+    # Values below 50 move into the left subtree, while values above 50
+    # move into the right subtree. Each recursive step repeats that same
+    # smaller-or-larger decision and reduces the remaining search space.
+    for value in tree_values:
+        tree.insert(value)
+
+    print("Values inserted into the BST:", tree_values)
+    print("Root value:", tree.root.value)
 
     # ===============================
     # TODO (Student): IN-ORDER TRAVERSAL
@@ -124,7 +174,9 @@ def main():
     #    sorted output in a BST.
 
     print("\n=== IN-ORDER TRAVERSAL ===")
-    print("TODO: Display and explain traversal results.")
+    traversal = tree.inorder()
+    print("In-order traversal result:", traversal)
+    print("The traversal is sorted because it visits left subtree, node, then right subtree.")
 
     # ===============================
     # TODO (Student): SEARCH TESTS
@@ -136,7 +188,13 @@ def main():
     # 3. Use comments to clearly explain the results.
 
     print("\n=== SEARCH TESTS ===")
-    print("TODO: Demonstrate BST searching.")
+    search_values = [40, 65, 25, 90]
+
+    # The first two values exist in the tree, while the last two do not.
+    # Missing values eventually reach an empty child reference and return False.
+    for value in search_values:
+        result = tree.search(value)
+        print(f"Search for {value}: {result}")
 
     # ===============================
     # TODO (Student): EDGE CASES
@@ -153,7 +211,35 @@ def main():
     # Use comments to explain what happens and why.
 
     print("\n=== EDGE CASES ===")
-    print("TODO: Demonstrate and explain an edge case.")
+    empty_tree = BST()
+    print("Empty tree traversal:", empty_tree.inorder())
+    print("Search for 10 in an empty tree:", empty_tree.search(10))
+
+    before_duplicate = tree.inorder()
+    tree.insert(60)
+    after_duplicate = tree.inorder()
+    print("Traversal before duplicate insert:", before_duplicate)
+    print("Traversal after trying to insert duplicate 60:", after_duplicate)
+    print("The duplicate was ignored so the BST kept one copy of each value.")
+
+    # ===============================
+    # REAL-WORLD SCENARIO
+    # ===============================
+
+    print("\n=== REAL-WORLD SCENARIO ===")
+    product_tree = BST()
+    product_ids = [1042, 1010, 1088, 1005, 1028, 1060, 1095]
+
+    # A store inventory system could use a BST-like ordering strategy for
+    # product IDs so lookup decisions move lower or higher instead of
+    # scanning every product one at a time.
+    for product_id in product_ids:
+        product_tree.insert(product_id)
+
+    print("Product IDs inserted:", product_ids)
+    print("Product IDs in sorted order:", product_tree.inorder())
+    print("Search for product 1060:", product_tree.search(1060))
+    print("Search for product 1100:", product_tree.search(1100))
 
 
 
